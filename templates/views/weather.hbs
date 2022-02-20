@@ -34,14 +34,14 @@
 
                <div class="tempinfo">
                    <div class="top_layer">
-                       <p id="day">Sunday</p>
+                       <p id="day">Thursday</p>
                        <p id="today_date">6th feb</p>
                    </div>
 
                    <div class="main_layer">
                        <p id="city_name">get output here</p>
                        <div class="middle-layer data_hide">
-                           <p id="temp"><span>0</span><sup>0</sup>C</span> </p>
+                           <p id="temp"><span id="temp_real_val">0</span><sup>0</sup>C</p>
                            <p id="temp_status"><i class="fa fa-cloud" aria-hidden="true"></i></p>
 
                        </div>   
@@ -66,6 +66,27 @@
       <!--footer code-->
         {{>footer}}
         <script src="js/main.js"></script>
+        <script>
+        
+          const getCurrentDay= ()=>{
+            let weekday=new Array[7];
+            weekday['0']="Sunday";
+            weekday['1']="Monday";
+            weekday['2']="Tuesday";
+            weekday['3']="Wednesday";
+            weekday['4']="Thursday";
+            weekday['5']="Friday";
+            weekday['6']="Saturday";
+
+           let currentTime=new Date();
+          days=weekday[currentTime.getDay()];
+          let day=document.getElementById('day');
+
+          day.innerText=days;
+          };
+          getCurrentDay();
+        </script>
+        
 
 
       <!--footer end-->

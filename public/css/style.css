@@ -166,9 +166,8 @@ footer p{
 
 
 .tempinfo{
-    width : 40rem;
-    margin : 5rem 42rem  6rem;
-    
+    width : 50rem;
+    margin : auto;
     min-height : 20rem;
     background-color: #1e202b;
     border-radius: 1rem;
@@ -206,7 +205,7 @@ footer p{
     padding : 2rem 0;
     color: antiquewhite;
     font-weight : 300;
-    font-size: 2rem;
+    font-size: 3rem;
 
 }
 
@@ -219,24 +218,24 @@ footer p{
 
 .main_layer .middle-layer p,
 .main_layer .middle-layer .fa{
-    font-size: 7rem;
-    font-weight: 900;
+    font-size: 4rem;
+    font-weight: 800;
+  
 }
 
 .fa{
-    color : #429dd1
+    color : #42b0d1
 }
 
 sup{
-    font-size: 6rem;
+    font-size: 3rem;
     margin-top: -2rem;
 }
-/*
+
 .data_hide{
     visibility: hidden;
     transition: all 0.3s linear;
 }
-*/
 
 
 
@@ -282,3 +281,27 @@ sup{
     color :  #429dd1;
 }
 
+.temp_form{
+    width: auto;
+}
+
+.tempinfo{
+    width : auto;
+}
+
+
+.divider:after,
+.divider:before {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #eee;
+}
+.h-custom {
+  height: calc(100% - 73px);
+}
+@media (max-width: 450px) {
+  .h-custom {
+    height: 100%;
+  }
+}
