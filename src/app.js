@@ -3,11 +3,15 @@ const path=require("path");
 const express=require("express");
 const hbs=require("hbs");
 const bcrypt=require("bcryptjs");
+const cookieParser=require("cookie-parser");
+const multer=require("multer");
 //const requests=require("requests");
 const app=express();
 const port=process.env.PORT || 3000;
 require("./db/conn.js");
 const Register=require("./models/registers");
+const auth=require("./middleware/auth");
+const upload=require("./middleware/upload");
 
 
 
@@ -20,13 +24,94 @@ app.set('views',templatePath);
 hbs.registerPartials(partialsPath);
 app.use(express.static(staticPath));
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
+app.use(express.static("uploads"));
 
 
 
 app.get('/',(req,res)=>{
+
+  
+
     res.render("index");
+
+})
+
+app.get('/userdetails', function(req, res) {
+    Register.find({active: true},function(e,docs){
+    res.render('userdetails', {
+      "joblist" : docs
+    });
+  });
+})
+
+  
+
+  app.get("/update/:id",(req,res,next)=>{
+      //console.log(req.params.id);
+      Register.findOneAndUpdate({_id : req.params.id},req.body,{new:true},(e,docs)=>{
+        if(e){
+               console.log("not find data for update");
+               next(e);
+        }
+        else{
+        res.render('update', {
+          joblist : docs
+        });
+      }
+    });
+    })
+
+
+
+  app.post("/update/:id",(req,res,next)=>{
+    Register.findByIdAndUpdate({_id : req.params.id},req.body,(e,docs)=>{
+        if(e){
+               console.log("Error");
+               next(e);
+        }
+        else{
+        res.redirect("/userdetails");
+      }
+    });
+    
+});
+
+
+  app.get("/delete/:id",async(req,res)=>{
+    try{
+        
+        const deleteData=await Register.findByIdAndDelete(req.params.id);
+        if(!req.params.id){
+            res.status(404).send();  
+        }
+        else{
+            //res.send(deleteData); 
+            res.redirect("/userdetails"); 
+        }
+
+
+    }
+    catch(e){
+        res.status(500).send(e);
+    }
+})
+      
+    
+   
+
+
+
+
+
+
+
+
+app.get('/secure',auth,(req,res)=>{
+    //console.log("The cookies token is"+req.cookies.jwt);
+    res.render("secure");
 
 })
 
@@ -46,10 +131,25 @@ app.get('/register',(req,res)=>{
 })
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Register with bcrypt//
 
 
-app.post('/register',async(req,res)=>{
+app.post('/register',upload,async(req,res)=>{
     
     try{
         const password = req.body.password;
@@ -63,16 +163,26 @@ app.post('/register',async(req,res)=>{
                 phoneno : req.body.phone,
                 age : req.body.age,
                 password : password,
-                confirmpassword : req.body.confirm
+                confirmpassword : req.body.confirm,
+                image : req.file.filename
             })
 
-
+           //console.log(image);
             const token= await registerEmp.generateAuthToken();
             console.log("The token part is"+token);
+           
+            /*
+            res.cookie("jwt",token,{
+                expires: new Date(Date.now() + 5000),
+                httpOnly : true
+            });
+            */
+            //console.log(cookie);
             
             const registered=await registerEmp.save();
-            console.log("The page part is:"+registered);
-            res.status(201).render("index");
+            //console.log("The page part is:"+registered);
+            
+            res.redirect("/userdetails");
 
         }
         else{
@@ -108,6 +218,14 @@ app.post('/login',async(req,res)=>{
         const token= await useremail.generateAuthToken();
         console.log("The token part is"+token);
 
+        res.cookie("jwt",token,{
+            expires: new Date(Date.now() + 50000),
+            httpOnly : true
+        });
+
+        
+        
+
         if(isMatch){
            res.status(201).render("index");
         }
@@ -124,6 +242,29 @@ app.post('/login',async(req,res)=>{
 
 
    
+})
+
+app.get('/logout',auth,async(req,res)=>{
+    try{
+        // for logout single device//
+        /*req.user.tokens=req.user.tokens.filter((currentToken)=>{
+            return currentToken.token !== req.token;
+
+        })*/
+
+        // for logout all devices//
+        req.user.tokens=[];
+        
+        res.clearCookie('jwt');
+        console.log("Logout successfully");
+        await req.user.save();
+        res.render("login");
+
+    }
+    catch(error){
+        res.status(500).send(error);
+    }
+
 })
 
 app.get('*',(req,res)=>{
